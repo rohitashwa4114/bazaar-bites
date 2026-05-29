@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 
-// 1. ALL LUCKNOW AREAS & ADJACENT DISTRICTS
 const REGIONS = {
   "Central Lucknow": ["Hazratganj", "Aminabad", "Chowk", "Charbagh", "Lalbagh", "Naka Hindola", "Sadar Bazar"],
   "East Lucknow": ["Gomti Nagar", "Indira Nagar", "Aliganj", "Mahanagar", "Janki Puram", "Chinhat", "Vikas Nagar"],
@@ -8,10 +7,8 @@ const REGIONS = {
   "Adjacent Regions": ["Barabanki Border", "Unnao Border", "Rae Bareli Border", "Sitapur Road Border"]
 };
 
-// Flattened list for easy filtering
 const ALL_AREAS = Object.values(REGIONS).flat();
 
-// 2. EXPANDED INITIAL VENDOR DATA FOR LUCKNOW
 const INITIAL_VENDORS = [
   { id: 1, name: "Sharma Ji Ki Chai", food: "Chai & Bun Makhan", area: "Hazratganj", status: "Open", time: "07:00 AM", note: "Sitting near the corner shop as usual." },
   { id: 2, name: "Tunday Kababi (Thela Version)", food: "Galouti Kabab", area: "Chowk", status: "Open", time: "01:00 PM", note: "Main market lane." },
@@ -33,12 +30,9 @@ export default function App() {
   const [vendors, setVendors] = useState(INITIAL_VENDORS);
   const [myShopStatus, setMyShopStatus] = useState("Closed");
   const [shopLocationNote, setShopLocationNote] = useState("Near the main chauraha");
-  const [adminStats, setAdminStats] = useState({ total: 10, open: 6, missedCalls: 42, revenue: 1200 });
 
-  // Handle vendor simulation updates
   const handleStatusChange = (newStatus) => {
     setMyShopStatus(newStatus);
-    // Update vendor ID 1 (simulating "Sharma Ji" as user's shop)
     setVendors(prev => prev.map(v => v.id === 1 ? { ...v, status: newStatus, time: newStatus === "Open" ? "Now" : "--" } : v));
   };
 
@@ -50,119 +44,144 @@ export default function App() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-800 pb-16">
-      {/* HEADER */}
-      <header className="bg-red-600 text-white p-4 shadow-md sticky top-0 z-50">
+    <div className="min-h-screen bg-[#fcfbfa] flex flex-col font-sans antialiased text-gray-900 pb-24">
+      
+      {/* BEAUTIFIED STICKY HEADER */}
+      <header className="bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 text-white px-4 py-5 shadow-lg sticky top-0 z-50 rounded-b-2xl">
         <div className="max-w-md mx-auto flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold tracking-wide">Bazaar Bites 🍛</h1>
-            <p className="text-xs text-red-100 font-medium">Lucknow's Live Street Food Tracker</p>
+            <h1 className="text-2xl font-black tracking-tight flex items-center gap-1.5">
+              Bazaar Bites <span className="text-xl">🍛</span>
+            </h1>
+            <p className="text-xs text-rose-100 font-medium tracking-wide mt-0.5 opacity-90">Lucknow's Live Street Food Network</p>
           </div>
-          <span className="bg-white text-red-600 text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider shadow-sm animate-pulse">● Live Lucknow</span>
+          <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
+            <span className="text-[11px] font-bold tracking-wider uppercase text-white">Live Avadh</span>
+          </div>
         </div>
       </header>
 
-      {/* MAIN CONTENT CONTAINER */}
-      <main className="flex-1 max-w-md w-full mx-auto p-4">
+      {/* MAIN CONTAINER */}
+      <main className="flex-1 max-w-md w-full mx-auto px-4 mt-4">
         
-        {/* TAB 1: DISCOVER (CUSTOMER VIEW) */}
+        {/* TAB 1: DISCOVER */}
         {activeTab === "discover" && (
-          <div className="space-y-4">
-            {/* SEARCH AND FILTERS */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
-              <input 
-                type="text" 
-                placeholder="🔍 Search chaat, kulfi, tea or thela name..." 
-                className="w-full p-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          <div className="space-y-5">
+            
+            {/* SEARCH AND CONTROLS CARD */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 text-base">🔍</span>
+                <input 
+                  type="text" 
+                  placeholder="Search chaat, kulfi, tea or stall..." 
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200/80 rounded-xl text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
               
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Select Area</label>
-                  <select 
-                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500"
-                    value={selectedArea}
-                    onChange={(e) => setSelectedArea(e.target.value)}
-                  >
-                    <option value="All">All Lucknow & Adjacent</option>
-                    {Object.entries(REGIONS).map(([regionName, areas]) => (
-                      <optgroup key={regionName} label={regionName} className="font-bold text-red-600">
-                        {areas.map(area => (
-                          <option key={area} value={area} className="text-gray-700 font-normal">{area}</option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">Filter by Area</label>
+                <select 
+                  className="w-full p-3 bg-gray-50 border border-gray-200/80 rounded-xl text-sm font-semibold text-gray-700 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white"
+                  value={selectedArea}
+                  onChange={(e) => setSelectedArea(e.target.value)}
+                >
+                  <option value="All">🌟 All Lucknow & Surrounding Borders</option>
+                  {Object.entries(REGIONS).map(([regionName, areas]) => (
+                    <optgroup key={regionName} label={regionName} className="font-bold text-rose-600 bg-white">
+                      {areas.map(area => (
+                        <option key={area} value={area} className="text-gray-700 font-medium">{area}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Availability</label>
-                  <div className="flex bg-gray-100 p-1 rounded-lg">
-                    <button 
-                      className={`flex-1 text-xs py-1.5 font-bold rounded-md transition-all ${statusFilter === "All" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500"}`}
-                      onClick={() => setStatusFilter("All")}
-                    > All </button>
-                    <button 
-                      className={`flex-1 text-xs py-1.5 font-bold rounded-md transition-all ${statusFilter === "Open Now" ? "bg-green-600 text-white shadow-sm" : "text-gray-500"}`}
-                      onClick={() => setStatusFilter("Open Now")}
-                    > Open Now </button>
+              <div className="flex gap-2 pt-1">
+                <button 
+                  className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all tracking-wide border ${statusFilter === "All" ? "bg-gray-900 text-white border-gray-900 shadow-sm" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
+                  onClick={() => setStatusFilter("All")}
+                >Show All Stalls</button>
+                <button 
+                  className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all tracking-wide border flex items-center justify-center gap-1 ${statusFilter === "Open Now" ? "bg-emerald-600 text-white border-emerald-600 shadow-sm" : "bg-white text-emerald-600 border-gray-200 hover:bg-emerald-50"}`}
+                  onClick={() => setStatusFilter("Open Now")}
+                >🟢 Only Open Now</button>
+              </div>
+            </div>
+
+            {/* VISUAL MINI MAP COMPONENT */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-3">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest pl-1">Live Hub Coverage Map</h3>
+                <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded font-bold border border-amber-100">Zone Map Active</span>
+              </div>
+              <div className="bg-gradient-to-b from-orange-50/60 to-amber-50/30 border border-orange-100/70 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1 p-2 bg-white rounded-lg border border-orange-100 shadow-xs text-center">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase">West</p>
+                    <p className="text-xs font-extrabold text-orange-800 mt-0.5">Unnao Line</p>
+                  </div>
+                  <div className="w-12 h-0.5 bg-dashed border-t-2 border-orange-200"></div>
+                  <div className="flex-1 p-2 bg-rose-50 rounded-lg border border-rose-100 shadow-xs text-center ring-2 ring-rose-500/20">
+                    <p className="text-[10px] text-rose-500 font-bold uppercase">Heart</p>
+                    <p className="text-xs font-extrabold text-rose-900 mt-0.5">Hazratganj/Chowk</p>
+                  </div>
+                  <div className="w-12 h-0.5 bg-dashed border-t-2 border-orange-200"></div>
+                  <div className="flex-1 p-2 bg-white rounded-lg border border-orange-100 shadow-xs text-center">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase">East</p>
+                    <p className="text-xs font-extrabold text-orange-800 mt-0.5">Barabanki Line</p>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* HAND-DRAWN MOCK REGIONAL MAP DISPLAY */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-              <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center justify-between">
-                <span>🗺️ Live Avadh Coverage Map</span>
-                <span className="text-xs font-normal text-gray-400">Interactive Zones</span>
-              </h3>
-              <div className="w-full bg-orange-50 border border-orange-100 rounded-lg p-3 text-center space-y-2">
-                <div className="grid grid-cols-3 gap-2 text-xs font-bold text-orange-800">
-                  <div className="p-2 bg-white rounded border border-orange-200 shadow-xs">⬅️ Unnao Border</div>
-                  <div className="p-2 bg-red-100 rounded border border-red-200 shadow-xs text-red-900">📍 Chowk / Central</div>
-                  <div className="p-2 bg-white rounded border border-orange-200 shadow-xs">➡️ Barabanki Border</div>
+                <div className="text-center text-[11px] text-gray-500 font-medium">
+                  Real-time status tracking spanning across <span className="font-bold text-red-600">{ALL_AREAS.length} micro-locations</span>.
                 </div>
-                <div className="text-[11px] text-orange-600 italic">Showing live updates across {ALL_AREAS.length} target zones.</div>
               </div>
             </div>
 
-            {/* LIVE STALLS LIST */}
+            {/* STALLS LIST WITH PREMIUM CARDS */}
             <div className="space-y-3">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <span>🍛 Street Stalls</span>
-                <span className="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">{filteredVendors.length} found</span>
-              </h2>
+              <div className="flex justify-between items-center pl-1">
+                <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Active Street Stalls</h2>
+                <span className="text-xs bg-gray-100 font-bold text-gray-600 px-2.5 py-0.5 rounded-full">{filteredVendors.length} Listings</span>
+              </div>
 
               {filteredVendors.length === 0 ? (
-                <div className="text-center py-8 bg-white rounded-xl border border-dashed border-gray-300 text-gray-400">
-                  No vendors active in this selection right now.
+                <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200 text-gray-400 space-y-1">
+                  <p className="text-2xl">🍽️</p>
+                  <p className="text-sm font-medium">No street vendors matching your filters are up right now.</p>
                 </div>
               ) : (
                 filteredVendors.map((vendor) => (
-                  <div key={vendor.id} className="bg-white rounded-xl p-4 shadow-xs border border-gray-100 flex flex-col justify-between hover:shadow-md transition-all">
-                    <div className="flex justify-between items-start">
+                  <div key={vendor.id} className="bg-white rounded-2xl p-4 shadow-xs border border-gray-100 flex flex-col justify-between hover:shadow-md hover:border-gray-200 transition-all duration-200">
+                    <div className="flex justify-between items-start gap-3">
                       <div>
-                        <span className="text-xs font-bold bg-red-50 text-red-600 px-2 py-0.5 rounded-sm uppercase tracking-wider">{vendor.area}</span>
-                        <h3 className="text-base font-bold text-gray-900 mt-1">{vendor.name}</h3>
-                        <p className="text-sm text-gray-600 font-medium">{vendor.food}</p>
+                        <span className="text-[10px] font-extrabold bg-rose-50 text-rose-600 px-2 py-0.5 rounded-md uppercase tracking-wider border border-rose-100/60">{vendor.area}</span>
+                        <h3 className="text-base font-bold text-gray-900 mt-1.5 leading-tight tracking-tight">{vendor.name}</h3>
+                        <p className="text-xs text-gray-500 font-medium mt-0.5">{vendor.food}</p>
                       </div>
                       
-                      <span className={`text-xs font-extrabold px-3 py-1 rounded-full border shadow-xs uppercase tracking-wider ${
-                        vendor.status === "Open" ? "bg-green-50 text-green-700 border-green-200" :
-                        vendor.status === "Closed" ? "bg-red-50 text-red-600 border-red-200" :
+                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border tracking-wider uppercase shadow-xs shrink-0 ${
+                        vendor.status === "Open" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                        vendor.status === "Closed" ? "bg-rose-50 text-rose-600 border-rose-200" :
                         vendor.status === "Moved" ? "bg-amber-50 text-amber-700 border-amber-200" :
-                        "bg-gray-100 text-gray-600 border-gray-300"
+                        "bg-gray-50 text-gray-500 border-gray-200"
                       }`}>
-                        {vendor.status === "Open" ? "● Open Now" : vendor.status === "Closed" ? "Closed" : vendor.status === "Moved" ? "⇄ Moved" : "Unknown"}
+                        {vendor.status === "Open" ? "● Open" : vendor.status === "Closed" ? "Closed" : vendor.status === "Moved" ? "⇄ Moved" : "Unknown"}
                       </span>
                     </div>
 
-                    <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
-                      <p className="font-medium text-gray-700"><span className="font-bold text-gray-400">Live Status:</span> "{vendor.note}"</p>
-                      {vendor.status === "Open" && <span className="text-[11px] bg-gray-100 px-2 py-1 rounded text-gray-600 font-bold">Since {vendor.time}</span>}
+                    <div className="mt-3.5 pt-3 border-t border-gray-100 flex justify-between items-center text-xs">
+                      <p className="text-gray-600 font-medium pr-2 line-clamp-1">
+                        <span className="font-bold text-gray-400">Live Note:</span> "{vendor.note}"
+                      </p>
+                      {vendor.status === "Open" && (
+                        <span className="text-[10px] bg-gray-50 border border-gray-100 px-2 py-0.5 rounded font-bold text-gray-500 shrink-0">
+                          {vendor.time}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))
@@ -171,133 +190,125 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 2: MY SHOP (VENDOR SIMULATION) */}
+        {/* TAB 2: MY SHOP */}
         {activeTab === "vendor" && (
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 space-y-6">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
             <div className="border-b border-gray-100 pb-4">
-              <h2 className="text-xl font-bold text-gray-900">🏪 Vendor Control Panel (दुकानदार ऐप)</h2>
-              <p className="text-sm text-gray-500 mt-1">Simulate what a street stall owner sees on their phone.</p>
+              <h2 className="text-lg font-bold text-gray-900 tracking-tight">🏪 Vendor Dashboard</h2>
+              <p className="text-xs text-gray-400 font-medium mt-0.5">Simulated mobile experience for the stall owners.</p>
             </div>
 
-            {/* STATUS UPDATER CONTROLS */}
-            <div className="space-y-3">
-              <label className="block text-xs font-extrabold text-gray-500 uppercase tracking-wider">आज दुकान की क्या स्थिति है?</label>
+            <div className="space-y-2">
+              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-0.5">दुकान की लाइव स्थिति सेट करें</label>
               <div className="grid grid-cols-3 gap-2">
                 <button 
                   onClick={() => handleStatusChange("Open")}
-                  className={`p-3 rounded-xl border font-bold text-sm flex flex-col items-center justify-center transition-all ${myShopStatus === "Open" ? "bg-green-600 text-white border-green-600 shadow-md scale-102" : "bg-gray-50 text-green-600 border-gray-200 hover:bg-green-50"}`}
+                  className={`p-3.5 rounded-xl border font-bold text-xs flex flex-col items-center justify-center transition-all ${myShopStatus === "Open" ? "bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/10 scale-[1.02]" : "bg-gray-50 text-emerald-600 border-gray-200 hover:bg-emerald-50/50"}`}
                 >
-                  <span className="text-xl mb-1">🟢</span> चालू है (Open)
+                  <span className="text-lg mb-1">🟢</span> चालू (Open)
                 </button>
                 <button 
                   onClick={() => handleStatusChange("Closed")}
-                  className={`p-3 rounded-xl border font-bold text-sm flex flex-col items-center justify-center transition-all ${myShopStatus === "Closed" ? "bg-red-600 text-white border-red-600 shadow-md scale-102" : "bg-gray-50 text-red-600 border-gray-200 hover:bg-red-50"}`}
+                  className={`p-3.5 rounded-xl border font-bold text-xs flex flex-col items-center justify-center transition-all ${myShopStatus === "Closed" ? "bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/10 scale-[1.02]" : "bg-gray-50 text-rose-600 border-gray-200 hover:bg-rose-50/50"}`}
                 >
-                  <span className="text-xl mb-1">🔴</span> बंद है (Closed)
+                  <span className="text-lg mb-1">🔴</span> बंद (Closed)
                 </button>
                 <button 
                   onClick={() => handleStatusChange("Moved")}
-                  className={`p-3 rounded-xl border font-bold text-sm flex flex-col items-center justify-center transition-all ${myShopStatus === "Moved" ? "bg-amber-500 text-white border-amber-500 shadow-md scale-102" : "bg-gray-50 text-amber-600 border-gray-200 hover:bg-amber-50"}`}
+                  className={`p-3.5 rounded-xl border font-bold text-xs flex flex-col items-center justify-center transition-all ${myShopStatus === "Moved" ? "bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/10 scale-[1.02]" : "bg-gray-50 text-amber-600 border-gray-200 hover:bg-amber-50/50"}`}
                 >
-                  <span className="text-xl mb-1">⇄</span> जगह बदली (Moved)
+                  <span className="text-lg mb-1">⇄</span> बदली (Moved)
                 </button>
               </div>
             </div>
 
-            {/* LOCATION NOTE INPUT */}
             <div className="space-y-2">
-              <label className="block text-xs font-extrabold text-gray-500 uppercase tracking-wider">Location Note / संदेश (Hindi or English)</label>
+              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-0.5">ग्राहकों के लिए संदेश (Location Note)</label>
               <input 
                 type="text" 
-                className="w-full p-3 border border-gray-200 rounded-lg text-sm bg-gray-50"
+                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white"
                 value={shopLocationNote}
                 onChange={(e) => setShopLocationNote(e.target.value)}
-                placeholder="e.g. आज मेट्रो पिलर २१० के पास हैं"
+                placeholder="उदा. आज कपूरथला चौराहे के पास खड़े हैं"
               />
-              <p className="text-[11px] text-gray-400">This helps Lucknow foodies track your cart if you move around.</p>
             </div>
 
-            {/* MISSED CALL FEATURE PROTOTYPE BOX */}
-            <div className="p-4 bg-red-50 rounded-xl border border-red-100 space-y-2">
-              <h4 className="text-xs font-extrabold text-red-800 uppercase tracking-wider flex items-center gap-1">📲 Quick Update via Free Missed Call</h4>
-              <p className="text-xs text-red-700 leading-relaxed">No smartphone? No internet data pack? Vendors just give a missed call from their registered phone number:</p>
-              <div className="bg-white px-3 py-2 rounded-lg border border-red-200 text-center font-mono font-bold text-base tracking-wider text-red-600 shadow-xs">
-                0522-24-BITES (Mock Line)
+            <div className="p-4 bg-gradient-to-br from-rose-50 to-amber-50 rounded-xl border border-rose-100/70 space-y-2.5">
+              <h4 className="text-xs font-bold text-rose-800 uppercase tracking-wider flex items-center gap-1">📞 Free Missed Call Shortcut</h4>
+              <p className="text-xs text-rose-700/90 leading-relaxed font-medium">No internet needed. Give a simple missed call from the shop's registered phone number to auto-open instantly:</p>
+              <div className="bg-white p-2.5 rounded-xl border border-rose-200/60 text-center font-mono font-bold text-base tracking-wider text-rose-600 shadow-xs">
+                0522-24-BITES
               </div>
-              <p className="text-[10px] text-red-500 italic text-center">Automatically sets status to "🟢 Open" instantly for free.</p>
             </div>
 
-            {/* SUBSCRIPTION SIMULATION */}
-            <div className="pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
-              <span className="font-medium text-gray-500">Monthly Plan Subscription:</span>
-              <span className="font-bold text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200">₹200 / Month Active</span>
+            <div className="pt-3 border-t border-gray-100 flex justify-between items-center text-xs font-semibold">
+              <span className="text-gray-400">Monthly Plan Subscription:</span>
+              <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">₹200 / Month Active</span>
             </div>
           </div>
         )}
 
-        {/* TAB 3: ADMIN PANEL */}
+        {/* TAB 3: ADMIN */}
         {activeTab === "admin" && (
           <div className="space-y-4">
-            {/* NUMERICAL ANALYTICS */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-xs">
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Total Stalls</p>
-                <p className="text-2xl font-black text-gray-800 mt-1">{adminStats.total}</p>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-xs">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Stalls</p>
+                <p className="text-2xl font-black text-gray-900 mt-0.5">10</p>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-xs">
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Currently Open</p>
-                <p className="text-2xl font-black text-green-600 mt-1">{vendors.filter(v => v.status === "Open").length}</p>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-xs">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Currently Open</p>
+                <p className="text-2xl font-black text-emerald-600 mt-0.5">{vendors.filter(v => v.status === "Open").length}</p>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-xs">
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Missed Call pings</p>
-                <p className="text-2xl font-black text-blue-600 mt-1">{adminStats.missedCalls}</p>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-xs">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Missed Call Logs</p>
+                <p className="text-2xl font-black text-blue-600 mt-0.5">42</p>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-xs">
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Estimated Revenue</p>
-                <p className="text-2xl font-black text-purple-600 mt-1">₹{vendors.length * 200}</p>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-xs">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Expected Revenue</p>
+                <p className="text-2xl font-black text-purple-600 mt-0.5">₹{vendors.length * 200}</p>
               </div>
             </div>
 
-            {/* LOCAL REGIONAL GROWTH PLAN */}
-            <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-xs space-y-3">
-              <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">Lucknow Regional Setup Info</h3>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                The database matrix is configured to group vendors into 4 distinct regions covering **Central, East, West/South Lucknow**, as well as major arterial **highways/border roads** to allow expansion into adjacent setups.
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs space-y-3">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Lucknow Database Mapping</h3>
+              <p className="text-xs text-gray-600 leading-relaxed font-medium">
+                The layout infrastructure dynamically supports micro-filtering logic for neighborhood-specific queries inside Lucknow and adjacent boundaries.
               </p>
-              <div className="bg-gray-50 p-2.5 rounded text-[11px] font-mono text-gray-600 border border-gray-200 space-y-1">
-                <div>Total target neighborhoods: {ALL_AREAS.length}</div>
-                <div>Configured database collections: [vendors, missed_calls, tracking_logs]</div>
+              <div className="bg-gray-50 p-3 rounded-xl text-[11px] font-mono text-gray-500 border border-gray-200/60">
+                <div>Regions Active: 4 Core Districts</div>
+                <div>Configured Points: {ALL_AREAS.length} Hotspots</div>
               </div>
             </div>
           </div>
         )}
       </main>
 
-      {/* BOTTOM NAVIGATION TABS */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 shadow-lg z-50">
-        <div className="max-w-md mx-auto flex justify-around items-center">
+      {/* MODERNIZED FLOATING NAVIGATION */}
+      <nav className="fixed bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md border border-gray-200/60 px-4 py-2.5 rounded-2xl shadow-xl z-50 max-w-md mx-auto">
+        <div className="flex justify-around items-center">
           <button 
             onClick={() => setActiveTab("discover")}
-            className={`flex flex-col items-center transition-all ${activeTab === "discover" ? "text-red-600 font-bold scale-105" : "text-gray-400 font-medium"}`}
+            className={`flex flex-col items-center gap-0.5 transition-all duration-200 ${activeTab === "discover" ? "text-red-600 font-bold scale-105" : "text-gray-400 font-medium hover:text-gray-600"}`}
           >
-            <span className="text-xl">🍽️</span>
-            <span className="text-xs mt-0.5">Discover</span>
+            <span className="text-lg">🍽️</span>
+            <span className="text-[10px] tracking-wide">Discover</span>
           </button>
 
           <button 
             onClick={() => setActiveTab("vendor")}
-            className={`flex flex-col items-center transition-all ${activeTab === "vendor" ? "text-red-600 font-bold scale-105" : "text-gray-400 font-medium"}`}
+            className={`flex flex-col items-center gap-0.5 transition-all duration-200 ${activeTab === "vendor" ? "text-red-600 font-bold scale-105" : "text-gray-400 font-medium hover:text-gray-600"}`}
           >
-            <span className="text-xl">🏪</span>
-            <span className="text-xs mt-0.5">My Shop</span>
+            <span className="text-lg">🏪</span>
+            <span className="text-[10px] tracking-wide">My Shop</span>
           </button>
 
           <button 
             onClick={() => setActiveTab("admin")}
-            className={`flex flex-col items-center transition-all ${activeTab === "admin" ? "text-red-600 font-bold scale-105" : "text-gray-400 font-medium"}`}
+            className={`flex flex-col items-center gap-0.5 transition-all duration-200 ${activeTab === "admin" ? "text-red-600 font-bold scale-105" : "text-gray-400 font-medium hover:text-gray-600"}`}
           >
-            <span className="text-xl">⚙️</span>
-            <span className="text-xs mt-0.5">Admin</span>
+            <span className="text-lg">⚙️</span>
+            <span className="text-[10px] tracking-wide">Admin</span>
           </button>
         </div>
       </nav>
